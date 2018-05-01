@@ -3,6 +3,7 @@ package portcheck
 import (
 	"os"
 	"github.com/spf13/pflag"
+	"fmt"
 )
 
 type Config struct {
@@ -15,6 +16,11 @@ type Config struct {
 func NewFromCmd() *Config {
 	config := getDefaultConfig()
 	cmd := pflag.CommandLine
+	cmd.Usage = func() {
+		fmt.Fprintf(os.Stderr, "Usage: %s [options] <ip> <port>\n\n", os.Args[0])
+		fmt.Fprintf(os.Stderr, "Options:\n")
+		cmd.PrintDefaults()
+	}
 
 	cmd.IntVarP(&config.Timeout, "timeout", "w", config.Timeout, "Timeout for wait connection.")
 
@@ -27,8 +33,8 @@ func NewFromCmd() *Config {
 	if *isUdp { config.Protocol = "udp" }
 
 	args := pflag.Args()
-	if len(args) < 2 {
-		println("Must define ip and port!")
+	if len(args) != 2 {
+		cmd.Usage()
 		os.Exit(35)
 	}
 

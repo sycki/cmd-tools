@@ -10,16 +10,18 @@ import (
 func Main() {
 	config := NewFromCmd()
 
-	conn, err := net.DialTimeout("tcp", net.JoinHostPort(config.Host, config.Port), time.Second*3)
+	timeout := time.Second * time.Duration(config.Timeout)
+
+	conn, err := net.DialTimeout(config.Protocol, net.JoinHostPort(config.Host, config.Port), timeout)
 	if err != nil {
 		fmt.Println("close")
 		println(err.Error())
 		os.Exit(31)
 	}
+	defer conn.Close()
 
 	fmt.Println("open")
 
-	conn.Close()
 	os.Exit(0)
 }
 

@@ -17,7 +17,6 @@ func Main() {
 
 	var result string
 	for _, record := range records {
-		// The SRV records ends in a "." for the root domain
 		addr := fmt.Sprintf(config.Format, record.Target[:len(record.Target)-1])
 		if result == "" {
 			result = addr

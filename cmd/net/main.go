@@ -1,59 +1,45 @@
 package main
 
 import (
+	"fmt"
+	"github.com/sycki/cmd-tools/pkg/lookuprsv"
+	"github.com/sycki/cmd-tools/pkg/portcheck"
 	"os"
-	"strings"
-	"reflect"
 )
 
-var modules = Modules{map[string]string{}}
-
-func init() {
-	clazz := reflect.TypeOf(&Modules{})
-	for i := 0; i < clazz.NumMethod(); i++ {
-		name := clazz.Method(i).Name
-		short := string(name[0])
-		modules.childCmds[short] = name
-	}
-}
-
 func main() {
-	childCmd := strings.ToUpper(os.Args[1])
+	cmd := NewCommands()
 
-	if len(childCmd) == 0 {
-		println("No child command specified")
+	cmd.AddP("portcheck", "p", "Check the port is open", portcheck.Main)
+	cmd.AddP("lookuprsv", "l", "Find peers by host name", lookuprsv.Main)
+
+	if len(os.Args) < 2 {
+		cmd.Usage()
 		os.Exit(11)
 	}
 
+	childCmd := os.Args[1]
 	if len(childCmd) == 1 {
-		value, ok := modules.childCmds[childCmd]
+		value, ok := cmd.short[childCmd]
 		if ok {
 			childCmd = value
 		} else {
-			println("Unknown child command", childCmd)
+			fmt.Fprintf(os.Stderr, "Unknown child command: %s\n\n", childCmd)
+			cmd.Usage()
 			os.Exit(13)
 		}
-	} else {
-		exist := false
-		for _, v := range modules.childCmds {
-			if v == childCmd {
-				exist = true
-				break
-			}
-		}
-		if !exist {
-			println("Unknown child command", childCmd)
-			os.Exit(15)
-		}
+	}
+	f, ok := cmd.funcs[childCmd]
+
+	if !ok {
+		fmt.Fprintf(os.Stderr, "Unknown found command: %s\n\n", childCmd)
+		cmd.Usage()
+		os.Exit(15)
 	}
 
-	for i, v := range os.Args {
-		if i <= 1 {
-			continue
-		}
-		os.Args[i-1] = v
-	}
+	os.Args[1] = fmt.Sprintf("%s %s", os.Args[0], childCmd)
+	os.Args = os.Args[1:]
 
-	clazz := reflect.ValueOf(&modules)
-	clazz.MethodByName(childCmd).Call(nil)
+	f()
+
 }
