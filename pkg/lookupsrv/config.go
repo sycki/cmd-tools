@@ -1,4 +1,4 @@
-package lookuprsv
+package lookupsrv
 
 import (
 	"os"

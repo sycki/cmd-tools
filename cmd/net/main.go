@@ -2,7 +2,7 @@ package main
 
 import (
 	"fmt"
-	"github.com/sycki/cmd-tools/pkg/lookuprsv"
+	"github.com/sycki/cmd-tools/pkg/lookupsrv"
 	"github.com/sycki/cmd-tools/pkg/portcheck"
 	"os"
 )
@@ -11,7 +11,7 @@ func main() {
 	cmd := NewCommands()
 
 	cmd.AddP("portcheck", "p", "Check the port is open", portcheck.Main)
-	cmd.AddP("lookuprsv", "l", "Find peers by host name", lookuprsv.Main)
+	cmd.AddP("lookupsrv", "l", "Find peers by host name", lookupsrv.Main)
 
 	if len(os.Args) < 2 {
 		cmd.Usage()
